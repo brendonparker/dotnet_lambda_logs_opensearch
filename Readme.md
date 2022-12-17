@@ -6,4 +6,5 @@
 ## Build/Deploy:
 ```
 dotnet publish ./SampleApi -c Release -o ./LambdaSource/SampleApi
+cdk deploy
 ```
