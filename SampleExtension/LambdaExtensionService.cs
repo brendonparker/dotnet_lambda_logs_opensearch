@@ -1,6 +1,6 @@
 using SampleExtension;
 
-public class LambdaExtensionService : IHostedService
+public class LambdaExtensionService : BackgroundService
 {
     private readonly ILogger<LambdaExtensionService> _log;
     private readonly LambdaExtensionClient _lambdaExtensionClient;
@@ -12,8 +12,8 @@ public class LambdaExtensionService : IHostedService
         _log = log;
         _lambdaExtensionClient = lambdaExtensionClient;
     }
-    
-    public async Task StartAsync(CancellationToken cancellationToken)
+
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         await _lambdaExtensionClient.RegisterAsync();
         await _lambdaExtensionClient.SubscribeToLogs();
@@ -32,6 +32,4 @@ public class LambdaExtensionService : IHostedService
             }
         }
     }
-
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

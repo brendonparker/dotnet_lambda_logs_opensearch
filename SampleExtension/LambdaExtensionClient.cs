@@ -10,7 +10,7 @@ public class LambdaExtensionClient
     private readonly IHttpClientFactory _httpClientFactory;
     public const string EXTENSION_CLIENT = "ExtensionClient";
     public const string Lambda_Extension_Identifier = "Lambda-Extension-Identifier";
-    private string LambdaExtensionIdentifier = null;
+    private static string LambdaExtensionIdentifier = null;
     
     public LambdaExtensionClient(
         ILogger<LambdaExtensionClient> log,

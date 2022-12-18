@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using SampleExtension;
 using Serilog;
@@ -14,15 +15,23 @@ builder.Services.AddHostedService<LambdaExtensionService>();
 
 var app = builder.Build();
 
-app.MapPut("/lambda_logs", Handle);
-app.MapPost("/lambda_logs", Handle);
+app.MapPost("/lambda_logs", HandlePost);
 
-await app.RunAsync("http://sandbox:4243");
+app.Run("http://sandbox:4243");
 
-static async Task Handle(HttpContext context, [FromServices] ILogger<LambdaExtensionClient> log)
+static async Task HandlePost(
+    [FromServices] ILogger<LambdaExtensionClient> log,
+    [FromBody] List<LogObject> logs)
 {
-    var sr = new StreamReader(context.Request.Body);
-    var content = await sr.ReadToEndAsync();
-    log.LogInformation("Received Logs! {HttpMethod}", context.Request.Method);
-    log.LogInformation(content);
+    log.LogInformation("Received Logs!");
+}
+
+public sealed class LogObject
+{
+    [JsonPropertyName("time")]
+    public DateTime Timestamp { get; set; }
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
+    [JsonPropertyName("record")]
+    public string LogMessage { get; set; }
 }
