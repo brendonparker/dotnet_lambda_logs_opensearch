@@ -7,6 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApi", "SampleApi\Samp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfrastructureAsCode", "InfrastructureAsCode\InfrastructureAsCode.csproj", "{8D1C79CF-ED31-411A-A7E9-D3AA535CD73E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleExtension", "SampleExtension\SampleExtension.csproj", "{AC664343-E364-41C8-ACC5-006E08E56A8B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionFolder", "{C4A4C4A5-EFC4-43E3-84E6-63E5CA0A4CF7}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.md = Readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +31,9 @@ Global
 		{8D1C79CF-ED31-411A-A7E9-D3AA535CD73E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D1C79CF-ED31-411A-A7E9-D3AA535CD73E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D1C79CF-ED31-411A-A7E9-D3AA535CD73E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC664343-E364-41C8-ACC5-006E08E56A8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC664343-E364-41C8-ACC5-006E08E56A8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC664343-E364-41C8-ACC5-006E08E56A8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC664343-E364-41C8-ACC5-006E08E56A8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

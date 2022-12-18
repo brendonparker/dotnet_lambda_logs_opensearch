@@ -12,7 +12,16 @@ public class InfrastructureAsCodeStack : Stack
             Runtime = Lambda.Runtime.DOTNET_6,
             MemorySize = 1024,
             Handler = "SampleApi",
-            Code = new Lambda.AssetCode("./LambdaSource/SampleApi")
+            Code = new Lambda.AssetCode("./LambdaSource/SampleApi"),
+            Layers = new []
+            {
+                new Lambda.LayerVersion(this, "CustomLayer", new Lambda.LayerVersionProps
+                {
+                    CompatibleRuntimes = new []{ Lambda.Runtime.DOTNET_6 },
+                    Code = new Lambda.AssetCode("./LambdaSource/SampleExtension"),
+                    RemovalPolicy = RemovalPolicy.DESTROY
+                })
+            }
         });
 
         var functionUrl = lambda.AddFunctionUrl(new Lambda.FunctionUrlOptions
