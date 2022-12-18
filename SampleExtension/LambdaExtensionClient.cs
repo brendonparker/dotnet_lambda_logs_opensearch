@@ -22,6 +22,8 @@ public class LambdaExtensionClient
     
     public async Task RegisterAsync()
     {
+        using var _ = _log.BeginScope("RegisterAsync");
+        _log.LogInformation("Registering...");
         using var client = _httpClientFactory.CreateClient(EXTENSION_CLIENT);
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, "/2020-01-01/extension/register");
         httpRequestMessage.Headers.Add("Lambda-Extension-Name", "sample-extension");
@@ -41,8 +43,9 @@ public class LambdaExtensionClient
     
     public async Task SubscribeToLogs()
     {
+        using var _ = _log.BeginScope("SubscribeToLogs");
         if (string.IsNullOrWhiteSpace(LambdaExtensionIdentifier)) return;
-        
+        _log.LogInformation("Subscribing to Logs...");
         using var client = _httpClientFactory.CreateClient(EXTENSION_CLIENT);
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, "/2020-08-15/logs");
         httpRequestMessage.Headers.Add(Lambda_Extension_Identifier, LambdaExtensionIdentifier);
@@ -71,7 +74,8 @@ public class LambdaExtensionClient
     public async Task<NextEventResponse> NextAsync()
     {
         if (string.IsNullOrWhiteSpace(LambdaExtensionIdentifier)) return null;
-        
+     
+        using var _ = _log.BeginScope("NextAsync");
         using var client = _httpClientFactory.CreateClient(EXTENSION_CLIENT);
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "/2020-01-01/extension/event/next");
         httpRequestMessage.Headers.Add(Lambda_Extension_Identifier, LambdaExtensionIdentifier);
