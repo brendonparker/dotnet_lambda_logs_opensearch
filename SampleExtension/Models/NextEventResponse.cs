@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace SampleExtension;
+namespace SampleExtension.Models;
 
 public sealed class NextEventResponse
 {

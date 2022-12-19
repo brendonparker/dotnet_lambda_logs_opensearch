@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json.Serialization;
 using Amazon.KinesisFirehose;
 using Amazon.KinesisFirehose.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +19,7 @@ builder.Host.UseSerilog((ctx, config) => { config.WriteTo.Console(new Elasticsea
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonKinesisFirehose>();
-builder.Services.AddExtensionClient();
+builder.Services.AddLambdaExtensionClient();
 builder.Services.AddHostedService<LambdaExtensionBackgroundService>();
 
 var app = builder.Build();
@@ -37,7 +36,10 @@ app.Map("/lambda_logs", async (
         var res = await firehose.PutRecordBatchAsync(new PutRecordBatchRequest
         {
             DeliveryStreamName = DELIVERY_STREAM_NAME,
-            Records = logs.ConvertAll(x => new Record { Data = new MemoryStream(Encoding.UTF8.GetBytes(x.LogMessage)) })
+            Records = logs.ConvertAll(x => new Record
+            {
+                Data = new MemoryStream(Encoding.UTF8.GetBytes(x.LogMessage))
+            })
         });
         log.LogInformation("PutRecordBatchAsync {HttpStatusCode} {FailedPutCount} {TotalCount}", res.HttpStatusCode,
             res.FailedPutCount, logs.Count);
@@ -48,14 +50,4 @@ app.Map("/lambda_logs", async (
     }
 });
 
-app.Run("http://sandbox:4243");
-
-public sealed class LogObject
-{
-    [JsonPropertyName("time")] public DateTime Timestamp { get; set; }
-    [JsonPropertyName("type")] public string Type { get; set; }
-
-    [JsonPropertyName("record")]
-    [JsonConverter(typeof(InfoToStringConverter))]
-    public string LogMessage { get; set; }
-}
+app.Run(Constants.ENDPOINT);

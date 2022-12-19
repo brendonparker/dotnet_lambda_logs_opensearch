@@ -2,7 +2,7 @@ namespace SampleExtension;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddExtensionClient(this IServiceCollection services)
+    public static IServiceCollection AddLambdaExtensionClient(this IServiceCollection services)
     {
         services.AddSingleton<LambdaExtensionClient>();
         services.AddHttpClient(LambdaExtensionClient.EXTENSION_CLIENT)

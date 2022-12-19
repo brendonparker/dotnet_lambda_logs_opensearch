@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using SampleExtension.Models;
+using static Constants;
 
 namespace SampleExtension;
 
@@ -9,7 +10,6 @@ public class LambdaExtensionClient
     private readonly ILogger<LambdaExtensionClient> _log;
     private readonly IHttpClientFactory _httpClientFactory;
     public const string EXTENSION_CLIENT = "ExtensionClient";
-    public const string Lambda_Extension_Identifier = "Lambda-Extension-Identifier";
     private static string LambdaExtensionIdentifier = null;
 
     public LambdaExtensionClient(
@@ -22,20 +22,22 @@ public class LambdaExtensionClient
 
     public async Task RegisterAsync()
     {
-        using var _ = _log.BeginScope("RegisterAsync");
         _log.LogInformation("Registering...");
+
         using var client = _httpClientFactory.CreateClient(EXTENSION_CLIENT);
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, "/2020-01-01/extension/register");
-        httpRequestMessage.Headers.Add("Lambda-Extension-Name", "sample-extension");
+        httpRequestMessage.Headers.Add(LAMBDA_EXTENSION_NAME, "sample-extension");
         var registerRequest = new
         {
-            events = new[] { "INVOKE", "SHUTDOWN" }
+            events = new[]
+            {
+                EVENT_TYPE_INVOKE, EVENT_TYPE_SHUTDOWN
+            }
         };
-        httpRequestMessage.Content = new StringContent(JsonSerializer.Serialize(registerRequest), Encoding.UTF8,
-            "application/json");
+        httpRequestMessage.Content = JsonContent(registerRequest);
         var res = await client.SendAsync(httpRequestMessage);
         _log.LogInformation("Response: {ResponseBody}", await res.Content.ReadAsStringAsync());
-        if (res.Headers.TryGetValues(Lambda_Extension_Identifier, out var values))
+        if (res.Headers.TryGetValues(LAMBDA_EXTENSION_IDENTIFIER, out var values))
         {
             LambdaExtensionIdentifier = values.First();
         }
@@ -43,16 +45,17 @@ public class LambdaExtensionClient
 
     public async Task SubscribeToLogs()
     {
-        using var _ = _log.BeginScope("SubscribeToLogs");
         if (string.IsNullOrWhiteSpace(LambdaExtensionIdentifier)) return;
+
         _log.LogInformation("Subscribing to Logs...");
+
         using var client = _httpClientFactory.CreateClient(EXTENSION_CLIENT);
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, "/2020-08-15/logs");
-        httpRequestMessage.Headers.Add(Lambda_Extension_Identifier, LambdaExtensionIdentifier);
+        httpRequestMessage.Headers.Add(LAMBDA_EXTENSION_IDENTIFIER, LambdaExtensionIdentifier);
         var subscriptionRequest = new ExtensionSubscriptionRequest
         {
             SchemaVersion = "2020-08-15",
-            Types = new[] { "function" },
+            Types = new[] { LOGS_FUNCTION },
             Buffering = new BufferingParameters
             {
                 MaxItems = 1000,
@@ -61,12 +64,11 @@ public class LambdaExtensionClient
             },
             Destination = new SubscriptionDestination
             {
-                Protocol = "HTTP",
-                Uri = "http://sandbox:4243/lambda_logs"
+                Protocol = PROTOCOL_HTTP,
+                Uri = $"{ENDPOINT}/lambda_logs"
             }
         };
-        httpRequestMessage.Content = new StringContent(JsonSerializer.Serialize(subscriptionRequest), Encoding.UTF8,
-            "application/json");
+        httpRequestMessage.Content = JsonContent(subscriptionRequest);
         var res = await client.SendAsync(httpRequestMessage);
         _log.LogInformation("Response: {ResponseBody}", await res.Content.ReadAsStringAsync());
     }
@@ -75,39 +77,14 @@ public class LambdaExtensionClient
     {
         if (string.IsNullOrWhiteSpace(LambdaExtensionIdentifier)) return null;
 
-        using var _ = _log.BeginScope("NextAsync");
         using var client = _httpClientFactory.CreateClient(EXTENSION_CLIENT);
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "/2020-01-01/extension/event/next");
-        httpRequestMessage.Headers.Add(Lambda_Extension_Identifier, LambdaExtensionIdentifier);
+        httpRequestMessage.Headers.Add(LAMBDA_EXTENSION_IDENTIFIER, LambdaExtensionIdentifier);
         var res = await client.SendAsync(httpRequestMessage);
         _log.LogInformation("Response: {ResponseBody}", await res.Content.ReadAsStringAsync());
         return await res.Content.ReadFromJsonAsync<NextEventResponse>();
     }
-}
 
-public sealed class ExtensionSubscriptionRequest
-{
-    [JsonPropertyName("schemaVersion")] public string SchemaVersion { get; set; }
-
-    /// <summary>
-    /// Valid values: platform, function
-    /// </summary>
-    [JsonPropertyName("types")]
-    public string[] Types { get; set; }
-
-    [JsonPropertyName("buffering")] public BufferingParameters Buffering { get; set; }
-    [JsonPropertyName("destination")] public SubscriptionDestination Destination { get; set; }
-}
-
-public sealed class BufferingParameters
-{
-    [JsonPropertyName("maxItems")] public int MaxItems { get; set; }
-    [JsonPropertyName("maxBytes")] public int MaxBytes { get; set; }
-    [JsonPropertyName("timeoutMs")] public int TimeoutInMilliseconds { get; set; }
-}
-
-public sealed class SubscriptionDestination
-{
-    [JsonPropertyName("protocol")] public string Protocol { get; set; }
-    [JsonPropertyName("URI")] public string Uri { get; set; }
+    private StringContent JsonContent<T>(T body) =>
+        new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 }

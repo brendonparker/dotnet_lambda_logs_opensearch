@@ -23,7 +23,7 @@ public class LambdaExtensionBackgroundService : BackgroundService
             {
                 var res = await _lambdaExtensionClient.NextAsync();
                 if (res == null) continue;
-                if (res.EventType == "SHUTDOWN") break;
+                if (res.EventType == Constants.EVENT_TYPE_SHUTDOWN) break;
             }
             catch (Exception e)
             {

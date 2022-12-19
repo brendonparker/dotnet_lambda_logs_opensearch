@@ -3,7 +3,6 @@ using Constructs;
 using Lambda = Amazon.CDK.AWS.Lambda;
 using Firehose = Amazon.CDK.AWS.KinesisFirehose.Alpha;
 using Destinations = Amazon.CDK.AWS.KinesisFirehose.Destinations.Alpha;
-using IAM = Amazon.CDK.AWS.IAM;
 using S3 = Amazon.CDK.AWS.S3;
 
 namespace InfrastructureAsCode;
@@ -49,27 +48,7 @@ public class InfrastructureAsCodeStack : Stack
 
         deliveryStream.GrantPutRecords(lambda);
 
-        lambda.Role.AttachInlinePolicy(new IAM.Policy(this, "CloudWatchDeny", new IAM.PolicyProps
-        {
-            PolicyName = "CloudWatchDeny",
-            Document = new IAM.PolicyDocument(new IAM.PolicyDocumentProps
-            {
-                Statements = new[]
-                {
-                    new IAM.PolicyStatement(new IAM.PolicyStatementProps
-                    {
-                        Effect = IAM.Effect.DENY,
-                        Actions = new[]
-                        {
-                            "logs:CreateLogGroup",
-                            "logs:CreateLogStream",
-                            "logs:PutLogEvents",
-                        },
-                        Resources = new[] { "arn:aws:logs:*:*:*" }
-                    })
-                }
-            })
-        }));
+        lambda.Role.DenyCloudWatch();
 
         var functionUrl = lambda.AddFunctionUrl(new Lambda.FunctionUrlOptions
         {
