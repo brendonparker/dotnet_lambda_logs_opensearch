@@ -52,11 +52,11 @@ public class LambdaExtensionClient
         var subscriptionRequest = new ExtensionSubscriptionRequest
         {
             SchemaVersion = "2020-08-15",
-            Types = new[] { "platform", "function" },
+            Types = new[] { "function" },
             Buffering = new BufferingParameters
             {
                 MaxItems = 1000,
-                MaxBytes = 262144,
+                MaxBytes = 5 * 1024 * 1024,
                 TimeoutInMilliseconds = 100
             },
             Destination = new SubscriptionDestination
@@ -89,6 +89,9 @@ public sealed class ExtensionSubscriptionRequest
 {
     [JsonPropertyName("schemaVersion")]
     public string SchemaVersion { get; set; }
+    /// <summary>
+    /// Valid values: platform, function
+    /// </summary>
     [JsonPropertyName("types")]
     public string[] Types { get; set; }
     [JsonPropertyName("buffering")]
