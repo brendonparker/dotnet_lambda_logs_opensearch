@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Amazon.KinesisFirehose;
 using Amazon.KinesisFirehose.Model;
@@ -22,7 +21,7 @@ builder.Host.UseSerilog((ctx, config) => { config.WriteTo.Console(new Elasticsea
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonKinesisFirehose>();
 builder.Services.AddExtensionClient();
-builder.Services.AddHostedService<LambdaExtensionService>();
+builder.Services.AddHostedService<LambdaExtensionBackgroundService>();
 
 var app = builder.Build();
 
@@ -59,21 +58,4 @@ public sealed class LogObject
     [JsonPropertyName("record")]
     [JsonConverter(typeof(InfoToStringConverter))]
     public string LogMessage { get; set; }
-}
-
-public class InfoToStringConverter : JsonConverter<string>
-{
-    public override string Read(
-        ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        using var jsonDoc = JsonDocument.ParseValue(ref reader);
-        return jsonDoc.RootElement.GetRawText();
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer, string value, JsonSerializerOptions options)
-    {
-        using var document = JsonDocument.Parse(value);
-        document.RootElement.WriteTo(writer);
-    }
 }

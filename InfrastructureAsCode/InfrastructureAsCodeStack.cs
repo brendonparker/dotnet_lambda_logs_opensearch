@@ -1,10 +1,9 @@
 using Amazon.CDK;
-using Amazon.CDK.AWS.IAM;
-using Amazon.CDK.AWS.KinesisFirehose.Destinations.Alpha;
 using Constructs;
 using Lambda = Amazon.CDK.AWS.Lambda;
 using Firehose = Amazon.CDK.AWS.KinesisFirehose.Alpha;
-using Destinations = Amazon.CDK.AWS.KinesisFirehose.Destinations;
+using Destinations = Amazon.CDK.AWS.KinesisFirehose.Destinations.Alpha;
+using IAM = Amazon.CDK.AWS.IAM;
 using S3 = Amazon.CDK.AWS.S3;
 
 namespace InfrastructureAsCode;
@@ -18,11 +17,12 @@ public class InfrastructureAsCodeStack : Stack
         {
             Destinations = new[]
             {
-                new S3Bucket(bucket, new S3BucketProps
+                new Destinations.S3Bucket(bucket, new Destinations.S3BucketProps
                 {
                     BufferingSize = Size.Mebibytes(1),
-                    BufferingInterval = Duration.Seconds(60)
-                })
+                    BufferingInterval = Duration.Seconds(60),
+                    Compression = Destinations.Compression.GZIP
+                }),
             },
         });
 
@@ -49,16 +49,16 @@ public class InfrastructureAsCodeStack : Stack
 
         deliveryStream.GrantPutRecords(lambda);
 
-        lambda.Role.AttachInlinePolicy(new Policy(this, "CloudWatchDeny", new PolicyProps
+        lambda.Role.AttachInlinePolicy(new IAM.Policy(this, "CloudWatchDeny", new IAM.PolicyProps
         {
             PolicyName = "CloudWatchDeny",
-            Document = new PolicyDocument(new PolicyDocumentProps
+            Document = new IAM.PolicyDocument(new IAM.PolicyDocumentProps
             {
                 Statements = new[]
                 {
-                    new PolicyStatement(new PolicyStatementProps
+                    new IAM.PolicyStatement(new IAM.PolicyStatementProps
                     {
-                        Effect = Effect.DENY,
+                        Effect = IAM.Effect.DENY,
                         Actions = new[]
                         {
                             "logs:CreateLogGroup",

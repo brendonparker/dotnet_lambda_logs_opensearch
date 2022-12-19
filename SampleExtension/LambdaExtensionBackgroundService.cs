@@ -1,12 +1,12 @@
 using SampleExtension;
 
-public class LambdaExtensionService : BackgroundService
+public class LambdaExtensionBackgroundService : BackgroundService
 {
-    private readonly ILogger<LambdaExtensionService> _log;
+    private readonly ILogger<LambdaExtensionBackgroundService> _log;
     private readonly LambdaExtensionClient _lambdaExtensionClient;
 
-    public LambdaExtensionService(
-        ILogger<LambdaExtensionService> log,
+    public LambdaExtensionBackgroundService(
+        ILogger<LambdaExtensionBackgroundService> log,
         LambdaExtensionClient lambdaExtensionClient)
     {
         _log = log;

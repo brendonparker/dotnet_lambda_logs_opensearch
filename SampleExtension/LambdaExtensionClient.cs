@@ -11,7 +11,7 @@ public class LambdaExtensionClient
     public const string EXTENSION_CLIENT = "ExtensionClient";
     public const string Lambda_Extension_Identifier = "Lambda-Extension-Identifier";
     private static string LambdaExtensionIdentifier = null;
-    
+
     public LambdaExtensionClient(
         ILogger<LambdaExtensionClient> log,
         IHttpClientFactory httpClientFactory)
@@ -19,7 +19,7 @@ public class LambdaExtensionClient
         _log = log;
         _httpClientFactory = httpClientFactory;
     }
-    
+
     public async Task RegisterAsync()
     {
         using var _ = _log.BeginScope("RegisterAsync");
@@ -40,7 +40,7 @@ public class LambdaExtensionClient
             LambdaExtensionIdentifier = values.First();
         }
     }
-    
+
     public async Task SubscribeToLogs()
     {
         using var _ = _log.BeginScope("SubscribeToLogs");
@@ -70,11 +70,11 @@ public class LambdaExtensionClient
         var res = await client.SendAsync(httpRequestMessage);
         _log.LogInformation("Response: {ResponseBody}", await res.Content.ReadAsStringAsync());
     }
-    
+
     public async Task<NextEventResponse> NextAsync()
     {
         if (string.IsNullOrWhiteSpace(LambdaExtensionIdentifier)) return null;
-     
+
         using var _ = _log.BeginScope("NextAsync");
         using var client = _httpClientFactory.CreateClient(EXTENSION_CLIENT);
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "/2020-01-01/extension/event/next");
@@ -87,33 +87,27 @@ public class LambdaExtensionClient
 
 public sealed class ExtensionSubscriptionRequest
 {
-    [JsonPropertyName("schemaVersion")]
-    public string SchemaVersion { get; set; }
+    [JsonPropertyName("schemaVersion")] public string SchemaVersion { get; set; }
+
     /// <summary>
     /// Valid values: platform, function
     /// </summary>
     [JsonPropertyName("types")]
     public string[] Types { get; set; }
-    [JsonPropertyName("buffering")]
-    public BufferingParameters Buffering { get; set; }
-    [JsonPropertyName("destination")]
-    public SubscriptionDestination Destination { get; set; }
+
+    [JsonPropertyName("buffering")] public BufferingParameters Buffering { get; set; }
+    [JsonPropertyName("destination")] public SubscriptionDestination Destination { get; set; }
 }
 
 public sealed class BufferingParameters
 {
-    [JsonPropertyName("maxItems")]
-    public int MaxItems { get; set; }
-    [JsonPropertyName("maxBytes")]
-    public int MaxBytes { get; set; }
-    [JsonPropertyName("timeoutMs")]
-    public int TimeoutInMilliseconds { get; set; }
+    [JsonPropertyName("maxItems")] public int MaxItems { get; set; }
+    [JsonPropertyName("maxBytes")] public int MaxBytes { get; set; }
+    [JsonPropertyName("timeoutMs")] public int TimeoutInMilliseconds { get; set; }
 }
 
 public sealed class SubscriptionDestination
 {
-    [JsonPropertyName("protocol")]
-    public string Protocol { get; set; }
-    [JsonPropertyName("URI")]
-    public string Uri { get; set; }
+    [JsonPropertyName("protocol")] public string Protocol { get; set; }
+    [JsonPropertyName("URI")] public string Uri { get; set; }
 }
